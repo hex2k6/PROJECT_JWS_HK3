@@ -6,6 +6,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.security.core.Authentication;
 
 @RestController
 @RequestMapping("/api/v1/auth")
@@ -85,6 +86,32 @@ public class AuthController {
                 .success(true)
                 .message(
                         "Logout success"
+                )
+                .data(null)
+                .build();
+    }
+    @PutMapping("/change-password")
+    public ApiResponse<String>
+    changePassword(
+
+            @RequestBody
+            ChangePasswordRequest request,
+
+            Authentication authentication
+    ) {
+
+        authService
+                .changePassword(
+                        authentication
+                                .getName(),
+                        request
+                );
+
+        return ApiResponse
+                .<String>builder()
+                .success(true)
+                .message(
+                        "Password changed"
                 )
                 .data(null)
                 .build();

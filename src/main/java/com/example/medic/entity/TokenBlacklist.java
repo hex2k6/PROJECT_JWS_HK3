@@ -6,6 +6,10 @@ import lombok.*;
 import java.time.LocalDateTime;
 
 @Entity
+@Table(
+        name =
+                "token_blacklist"
+)
 @Getter
 @Setter
 @NoArgsConstructor
@@ -14,11 +18,19 @@ import java.time.LocalDateTime;
 public class TokenBlacklist {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(
+            strategy =
+                    GenerationType.IDENTITY
+    )
     private Long id;
 
-    @Column(columnDefinition = "TEXT")
+    @Column(
+            unique = true,
+            columnDefinition =
+                    "TEXT"
+    )
     private String token;
 
-    private LocalDateTime revokedAt;
+    private LocalDateTime
+            revokedAt;
 }

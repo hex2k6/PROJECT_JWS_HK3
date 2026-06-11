@@ -13,6 +13,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -34,14 +35,22 @@ public class AppointmentServiceImpl
         User patient =
                 userRepository
                         .findByEmail(patientEmail)
-                        .orElseThrow();
+                        .orElseThrow(() ->
+                                new RuntimeException(
+                                        "Patient not found"
+                                )
+                        );
 
         User doctor =
                 userRepository
                         .findById(
                                 request.getDoctorId()
                         )
-                        .orElseThrow();
+                        .orElseThrow(() ->
+                                new RuntimeException(
+                                        "Doctor not found"
+                                )
+                        );
 
         if (doctor.getRole()
                 != RoleEnum.DOCTOR) {
@@ -71,15 +80,13 @@ public class AppointmentServiceImpl
                         .patient(patient)
                         .doctor(doctor)
                         .appointmentDate(
-                                request
-                                        .getAppointmentDate()
+                                request.getAppointmentDate()
                         )
                         .timeSlot(
                                 request.getTimeSlot()
                         )
                         .symptomDescription(
-                                request
-                                        .getSymptomDescription()
+                                request.getSymptomDescription()
                         )
                         .status(
                                 StatusEnum.PENDING
@@ -92,29 +99,108 @@ public class AppointmentServiceImpl
         appointmentRepository
                 .save(appointment);
 
+        return mapToDto(
+                appointment
+        );
+    }
+
+    @Override
+    public List<AppointmentDto>
+    getMyAppointments(
+            String email
+    ) {
+
+        User patient =
+                userRepository
+                        .findByEmail(email)
+                        .orElseThrow(() ->
+                                new RuntimeException(
+                                        "Patient not found"
+                                )
+                        );
+
+        return appointmentRepository
+                .findByPatient(
+                        patient
+                )
+                .stream()
+                .map(
+                        this::mapToDto
+                )
+                .toList();
+    }
+
+    @Override
+    public AppointmentDto
+    updateStatus(
+
+            Long appointmentId,
+
+            StatusEnum status
+    ) {
+
+        Appointment appointment =
+                appointmentRepository
+                        .findById(
+                                appointmentId
+                        )
+                        .orElseThrow(() ->
+                                new RuntimeException(
+                                        "Appointment not found"
+                                )
+                        );
+
+        appointment.setStatus(
+                status
+        );
+
+        appointmentRepository
+                .save(
+                        appointment
+                );
+
+        return mapToDto(
+                appointment
+        );
+    }
+
+    private AppointmentDto
+    mapToDto(
+            Appointment appointment
+    ) {
+
         return AppointmentDto
                 .builder()
-                .id(appointment.getId())
+                .id(
+                        appointment.getId()
+                )
                 .patientName(
-                        patient.getUsername()
+                        appointment
+                                .getPatient()
+                                .getUsername()
                 )
                 .doctorName(
-                        doctor.getUsername()
+                        appointment
+                                .getDoctor()
+                                .getUsername()
                 )
                 .appointmentDate(
                         appointment
                                 .getAppointmentDate()
                 )
                 .timeSlot(
-                        appointment.getTimeSlot()
+                        appointment
+                                .getTimeSlot()
                 )
                 .symptomDescription(
                         appointment
                                 .getSymptomDescription()
                 )
                 .status(
-                        appointment.getStatus()
+                        appointment
+                                .getStatus()
                 )
                 .build();
     }
+    
 }

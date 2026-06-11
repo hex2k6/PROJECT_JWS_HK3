@@ -1,9 +1,6 @@
 package com.example.medic.service.impl;
 
-import com.example.medic.dto.AuthResponse;
-import com.example.medic.dto.LoginRequest;
-import com.example.medic.dto.RefreshTokenRequest;
-import com.example.medic.dto.RegisterRequest;
+import com.example.medic.dto.*;
 import com.example.medic.entity.TokenBlacklist;
 import com.example.medic.entity.User;
 import com.example.medic.enums.RoleEnum;
@@ -14,22 +11,28 @@ import com.example.medic.service.AuthService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
 public class AuthServiceImpl
         implements AuthService {
 
-    private final UserRepository userRepository;
+    private final UserRepository
+            userRepository;
 
     private final TokenBlacklistRepository
             blacklistRepository;
 
-    private final PasswordEncoder passwordEncoder;
+    private final PasswordEncoder
+            passwordEncoder;
 
-    private final JwtService jwtService;
+    private final JwtService
+            jwtService;
 
     private final AuthenticationManager
             authenticationManager;
@@ -60,11 +63,17 @@ public class AuthServiceImpl
                                 request.getPassword()
                         )
                 )
-                .role(RoleEnum.PATIENT)
-                .active(true)
+                .role(
+                        RoleEnum.PATIENT
+                )
+                .active(
+                        true
+                )
                 .build();
 
-        userRepository.save(user);
+        userRepository.save(
+                user
+        );
 
         String accessToken =
                 jwtService.generateAccessToken(
@@ -77,8 +86,12 @@ public class AuthServiceImpl
                 );
 
         return AuthResponse.builder()
-                .accessToken(accessToken)
-                .refreshToken(refreshToken)
+                .accessToken(
+                        accessToken
+                )
+                .refreshToken(
+                        refreshToken
+                )
                 .build();
     }
 
@@ -94,15 +107,16 @@ public class AuthServiceImpl
                 )
         );
 
-        User user = userRepository
-                .findByEmail(
-                        request.getEmail()
-                )
-                .orElseThrow(() ->
-                        new RuntimeException(
-                                "User not found"
+        User user =
+                userRepository
+                        .findByEmail(
+                                request.getEmail()
                         )
-                );
+                        .orElseThrow(() ->
+                                new RuntimeException(
+                                        "User not found"
+                                )
+                        );
 
         String accessToken =
                 jwtService.generateAccessToken(
@@ -115,8 +129,12 @@ public class AuthServiceImpl
                 );
 
         return AuthResponse.builder()
-                .accessToken(accessToken)
-                .refreshToken(refreshToken)
+                .accessToken(
+                        accessToken
+                )
+                .refreshToken(
+                        refreshToken
+                )
                 .build();
     }
 
@@ -125,18 +143,48 @@ public class AuthServiceImpl
             RefreshTokenRequest request
     ) {
 
+        String refreshToken =
+                request.getRefreshToken();
+
         String email =
                 jwtService.extractUsername(
-                        request.getRefreshToken()
+                        refreshToken
                 );
 
-        User user = userRepository
-                .findByEmail(email)
-                .orElseThrow(() ->
-                        new RuntimeException(
-                                "User not found"
+        User user =
+                userRepository
+                        .findByEmail(
+                                email
                         )
+                        .orElseThrow(() ->
+                                new RuntimeException(
+                                        "User not found"
+                                )
+                        );
+
+        UserDetails userDetails =
+                new org.springframework
+                        .security
+                        .core
+                        .userdetails
+                        .User(
+
+                        user.getEmail(),
+
+                        user.getPassword(),
+
+                        List.of()
                 );
+
+        if (!jwtService.isTokenValid(
+                refreshToken,
+                String.valueOf(userDetails)
+        )) {
+
+            throw new RuntimeException(
+                    "Invalid refresh token"
+            );
+        }
 
         String newAccessToken =
                 jwtService.generateAccessToken(
@@ -148,7 +196,7 @@ public class AuthServiceImpl
                         newAccessToken
                 )
                 .refreshToken(
-                        request.getRefreshToken()
+                        refreshToken
                 )
                 .build();
     }
@@ -160,11 +208,55 @@ public class AuthServiceImpl
 
         TokenBlacklist blacklist =
                 TokenBlacklist.builder()
-                        .token(token)
+                        .token(
+                                token
+                        )
                         .build();
 
         blacklistRepository.save(
                 blacklist
+        );
+    }
+    @Override
+    public void changePassword(
+
+            String email,
+
+            ChangePasswordRequest request
+    ) {
+
+        User user =
+                userRepository
+                        .findByEmail(
+                                email
+                        )
+                        .orElseThrow(() ->
+                                new RuntimeException(
+                                        "User not found"
+                                )
+                        );
+
+        boolean matches =
+                passwordEncoder.matches(
+                        request.getOldPassword(),
+                        user.getPassword()
+                );
+
+        if (!matches) {
+
+            throw new RuntimeException(
+                    "Old password incorrect"
+            );
+        }
+
+        user.setPassword(
+                passwordEncoder.encode(
+                        request.getNewPassword()
+                )
+        );
+
+        userRepository.save(
+                user
         );
     }
 }

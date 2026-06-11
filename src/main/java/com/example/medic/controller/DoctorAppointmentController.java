@@ -1,41 +1,44 @@
 package com.example.medic.controller;
 
-import com.example.medic.dto.*;
+import com.example.medic.dto.ApiResponse;
+import com.example.medic.dto.AppointmentDto;
+import com.example.medic.enums.StatusEnum;
 import com.example.medic.service.AppointmentService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/api/v1/patient/appointments")
+@RequestMapping(
+        "/api/v1/doctor/appointments"
+)
 @RequiredArgsConstructor
-public class AppointmentController {
+public class DoctorAppointmentController {
 
     private final AppointmentService
             appointmentService;
 
-    @PostMapping
+    @PutMapping("/{id}/status")
     public ApiResponse<AppointmentDto>
-    createAppointment(
+    updateStatus(
 
-            @RequestBody
-            CreateAppointmentRequest request,
+            @PathVariable
+            Long id,
 
-            Authentication authentication
+            @RequestParam
+            StatusEnum status
     ) {
 
         return ApiResponse
                 .<AppointmentDto>builder()
                 .success(true)
                 .message(
-                        "Appointment created"
+                        "Appointment updated"
                 )
                 .data(
                         appointmentService
-                                .createAppointment(
-                                        authentication
-                                                .getName(),
-                                        request
+                                .updateStatus(
+                                        id,
+                                        status
                                 )
                 )
                 .build();
