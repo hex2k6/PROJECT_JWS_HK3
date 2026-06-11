@@ -7,6 +7,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.security.core.Authentication;
+import com.example.medic.dto.ForgotPasswordRequest;
 
 @RestController
 @RequestMapping("/api/v1/auth")
@@ -112,6 +113,27 @@ public class AuthController {
                 .success(true)
                 .message(
                         "Password changed"
+                )
+                .data(null)
+                .build();
+    }
+    @PostMapping("/forgot-password")
+    public ApiResponse<String>
+    forgotPassword(
+
+            @RequestBody
+            ForgotPasswordRequest request
+    ) {
+
+        authService.forgotPassword(
+                request
+        );
+
+        return ApiResponse
+                .<String>builder()
+                .success(true)
+                .message(
+                        "Password reset successfully"
                 )
                 .data(null)
                 .build();

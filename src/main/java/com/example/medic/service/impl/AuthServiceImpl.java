@@ -4,16 +4,17 @@ import com.example.medic.dto.*;
 import com.example.medic.entity.TokenBlacklist;
 import com.example.medic.entity.User;
 import com.example.medic.enums.RoleEnum;
-import com.example.medic.repository.TokenBlacklistRepository;
 import com.example.medic.repository.UserRepository;
 import com.example.medic.security.JwtService;
 import com.example.medic.service.AuthService;
+import com.example.medic.service.RedisBlacklistService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import com.example.medic.dto.ForgotPasswordRequest;
 
 import java.util.List;
 
@@ -25,8 +26,8 @@ public class AuthServiceImpl
     private final UserRepository
             userRepository;
 
-    private final TokenBlacklistRepository
-            blacklistRepository;
+    private final RedisBlacklistService
+            blacklistService;
 
     private final PasswordEncoder
             passwordEncoder;
@@ -206,15 +207,14 @@ public class AuthServiceImpl
             String token
     ) {
 
-        TokenBlacklist blacklist =
-                TokenBlacklist.builder()
-                        .token(
-                                token
-                        )
-                        .build();
+        long expiration =
+                jwtService.getExpiration(
+                        token
+                );
 
-        blacklistRepository.save(
-                blacklist
+        blacklistService.blacklistToken(
+                token,
+                expiration
         );
     }
     @Override
@@ -248,6 +248,32 @@ public class AuthServiceImpl
                     "Old password incorrect"
             );
         }
+
+        user.setPassword(
+                passwordEncoder.encode(
+                        request.getNewPassword()
+                )
+        );
+
+        userRepository.save(
+                user
+        );
+    }
+    @Override
+    public void forgotPassword(
+            ForgotPasswordRequest request
+    ) {
+
+        User user =
+                userRepository
+                        .findByEmail(
+                                request.getEmail()
+                        )
+                        .orElseThrow(() ->
+                                new RuntimeException(
+                                        "Email not found"
+                                )
+                        );
 
         user.setPassword(
                 passwordEncoder.encode(

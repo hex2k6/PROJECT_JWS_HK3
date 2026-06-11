@@ -23,4 +23,7 @@ public interface AuthService {
             String email,
             ChangePasswordRequest request
     );
+    void forgotPassword(
+            ForgotPasswordRequest request
+    );
 }
