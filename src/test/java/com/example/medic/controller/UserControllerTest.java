@@ -2,15 +2,18 @@ package com.example.medic.controller;
 
 import com.example.medic.service.UserService;
 import org.junit.jupiter.api.Test;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 
-@WebMvcTest(UserController.class)
+import org.springframework.boot.test.mock.mockito.MockBean;
+
+@SpringBootTest
+@AutoConfigureMockMvc(addFilters = false)
 class UserControllerTest {
 
-    @MockitoBean
-    UserService userService;
+    @MockBean
+    private UserService userService;
 
     @Test
     void dummy_test() {

@@ -35,10 +35,8 @@ public class RedisBlacklistServiceImpl
             String token
     ) {
 
-        return Boolean.TRUE.equals(
-                redisTemplate.hasKey(
-                        "blacklist:" + token
-                )
+        return redisTemplate.hasKey(
+                "blacklist:" + token
         );
     }
 }

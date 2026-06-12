@@ -5,6 +5,8 @@ import com.cloudinary.utils.ObjectUtils;
 import com.example.medic.dto.MedicalRecordDto;
 import com.example.medic.entity.MedicalRecord;
 import com.example.medic.entity.User;
+import com.example.medic.exception.ConflictException;
+import com.example.medic.exception.ResourceNotFoundException;
 import com.example.medic.repository.MedicalRecordRepository;
 import com.example.medic.repository.UserRepository;
 import com.example.medic.service.MedicalRecordService;
@@ -47,7 +49,7 @@ public class MedicalRecordServiceImpl
             if (file == null
                     || file.isEmpty()) {
 
-                throw new RuntimeException(
+                throw new ResourceNotFoundException(
                         "File is empty"
                 );
             }
@@ -59,7 +61,7 @@ public class MedicalRecordServiceImpl
                                     doctorEmail
                             )
                             .orElseThrow(() ->
-                                    new RuntimeException(
+                                    new ResourceNotFoundException(
                                             "Doctor not found"
                                     )
                             );
@@ -71,7 +73,7 @@ public class MedicalRecordServiceImpl
                                     patientId
                             )
                             .orElseThrow(() ->
-                                    new RuntimeException(
+                                    new ResourceNotFoundException(
                                             "Patient not found"
                                     )
                             );
@@ -147,7 +149,7 @@ public class MedicalRecordServiceImpl
             // in lỗi thật ra console
             e.printStackTrace();
 
-            throw new RuntimeException(
+            throw new ConflictException(
                     "Upload failed: "
                             + e.getMessage()
             );

@@ -4,6 +4,8 @@ import com.example.medic.dto.*;
 import com.example.medic.entity.TokenBlacklist;
 import com.example.medic.entity.User;
 import com.example.medic.enums.RoleEnum;
+import com.example.medic.exception.ConflictException;
+import com.example.medic.exception.ResourceNotFoundException;
 import com.example.medic.repository.UserRepository;
 import com.example.medic.security.JwtService;
 import com.example.medic.service.AuthService;
@@ -47,7 +49,7 @@ public class AuthServiceImpl
                 request.getEmail()
         )) {
 
-            throw new RuntimeException(
+            throw new ConflictException(
                     "Email already exists"
             );
         }
@@ -114,7 +116,7 @@ public class AuthServiceImpl
                                 request.getEmail()
                         )
                         .orElseThrow(() ->
-                                new RuntimeException(
+                                new ResourceNotFoundException(
                                         "User not found"
                                 )
                         );
@@ -158,7 +160,7 @@ public class AuthServiceImpl
                                 email
                         )
                         .orElseThrow(() ->
-                                new RuntimeException(
+                                new ResourceNotFoundException(
                                         "User not found"
                                 )
                         );
@@ -182,7 +184,7 @@ public class AuthServiceImpl
                 String.valueOf(userDetails)
         )) {
 
-            throw new RuntimeException(
+            throw new ConflictException(
                     "Invalid refresh token"
             );
         }
@@ -231,7 +233,7 @@ public class AuthServiceImpl
                                 email
                         )
                         .orElseThrow(() ->
-                                new RuntimeException(
+                                new ResourceNotFoundException(
                                         "User not found"
                                 )
                         );
@@ -244,7 +246,7 @@ public class AuthServiceImpl
 
         if (!matches) {
 
-            throw new RuntimeException(
+            throw new ConflictException(
                     "Old password incorrect"
             );
         }
@@ -270,7 +272,7 @@ public class AuthServiceImpl
                                 request.getEmail()
                         )
                         .orElseThrow(() ->
-                                new RuntimeException(
+                                new ResourceNotFoundException(
                                         "Email not found"
                                 )
                         );

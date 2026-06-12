@@ -6,6 +6,8 @@ import com.example.medic.entity.Appointment;
 import com.example.medic.entity.User;
 import com.example.medic.enums.RoleEnum;
 import com.example.medic.enums.StatusEnum;
+import com.example.medic.exception.ConflictException;
+import com.example.medic.exception.ResourceNotFoundException;
 import com.example.medic.repository.AppointmentRepository;
 import com.example.medic.repository.UserRepository;
 import com.example.medic.service.AppointmentService;
@@ -36,7 +38,7 @@ public class AppointmentServiceImpl
                 userRepository
                         .findByEmail(patientEmail)
                         .orElseThrow(() ->
-                                new RuntimeException(
+                                new ResourceNotFoundException(
                                         "Patient not found"
                                 )
                         );
@@ -47,7 +49,7 @@ public class AppointmentServiceImpl
                                 request.getDoctorId()
                         )
                         .orElseThrow(() ->
-                                new RuntimeException(
+                                new ResourceNotFoundException(
                                         "Doctor not found"
                                 )
                         );
@@ -55,7 +57,7 @@ public class AppointmentServiceImpl
         if (doctor.getRole()
                 != RoleEnum.DOCTOR) {
 
-            throw new RuntimeException(
+            throw new ConflictException(
                     "Invalid doctor"
             );
         }
@@ -70,7 +72,7 @@ public class AppointmentServiceImpl
 
         if (existed) {
 
-            throw new RuntimeException(
+            throw new ConflictException(
                     "Doctor already booked"
             );
         }
@@ -114,7 +116,7 @@ public class AppointmentServiceImpl
                 userRepository
                         .findByEmail(email)
                         .orElseThrow(() ->
-                                new RuntimeException(
+                                new ResourceNotFoundException(
                                         "Patient not found"
                                 )
                         );
@@ -145,7 +147,7 @@ public class AppointmentServiceImpl
                                 appointmentId
                         )
                         .orElseThrow(() ->
-                                new RuntimeException(
+                                new ResourceNotFoundException(
                                         "Appointment not found"
                                 )
                         );
