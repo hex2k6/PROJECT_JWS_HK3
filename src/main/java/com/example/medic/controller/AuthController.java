@@ -51,22 +51,20 @@ public class AuthController {
                 .build();
     }
     @PostMapping("/refresh")
-    public ApiResponse<AuthResponse> refresh(
-
+    public ApiResponse<AuthResponse>
+    refreshToken(
             @RequestBody
             RefreshTokenRequest request
     ) {
-
         return ApiResponse
                 .<AuthResponse>builder()
                 .success(true)
-                .message(
-                        "Refresh token success"
-                )
+                .message("Refresh success")
                 .data(
-                        authService.refreshToken(
-                                request
-                        )
+                        authService
+                                .refreshToken(
+                                        request
+                                )
                 )
                 .build();
     }

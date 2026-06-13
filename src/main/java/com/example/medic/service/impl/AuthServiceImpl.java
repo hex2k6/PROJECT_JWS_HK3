@@ -181,10 +181,10 @@ public class AuthServiceImpl
 
         if (!jwtService.isTokenValid(
                 refreshToken,
-                String.valueOf(userDetails)
+                user.getEmail()
         )) {
 
-            throw new ConflictException(
+            throw new RuntimeException(
                     "Invalid refresh token"
             );
         }
